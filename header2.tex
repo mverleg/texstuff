@@ -1,0 +1,42 @@
+%% LaTeX BOTTOM general header for style and packages
+% Mark Verleg, January 19th 2014
+
+%% PAGE LAYOUT
+% margin different for paper and electronic form
+\iftoggle{electronic}{%
+	\setboolean{@twoside}{false}
+}{}
+
+% two-column layout (multicol package) because long lines are apparently bad, but default margins are crazy
+% use \begin{multicols}{2} ... \end{multicols} and place images outside that
+\addtolength{\oddsidemargin}{-0.7in}
+\addtolength{\evensidemargin}{-0.7in}
+\addtolength{\textwidth}{1.4in}
+\setlength{\columnsep}{0.5in}
+
+%% HEADER & FOOTER
+\iftoggle{headers}{%
+	% hope '\leftmark' is always the short section title, because I can't find a direct reference...
+	\pagestyle{fancy}
+	\renewcommand{\headrulewidth}{0.2pt}
+	\renewcommand{\footrulewidth}{0.0pt}
+	\fancyhead[C]{page \thepage\ of \pageref{LastPage}}
+	\fancyfoot[L,C]{}
+	% some header and footer even/odd changes for printed format
+	\iftoggle{electronic}{%
+		\fancyhead[LE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+		\fancyhead[R]{\leftmark}
+		\fancyfoot[R]{\raisebox{-1.0\height}{\includegraphics[height=0.8in,keepaspectratio]{\departmentlogo}}}
+	}{%
+		\fancyhead[RE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+		\fancyhead[LE,RO]{\leftmark}
+		\fancyfoot[RO]{\raisebox{-1.0\height}{\includegraphics[height=0.8in,keepaspectratio]{\departmentlogo}}}
+	}
+	% add 'concept version' footer if this is, in fact, a concept version
+	\iftoggle{finalversion}{}{%
+		\fancyfoot[L]{\textcolor{red}{\\ \MakeUppercase{Concept version}} \\ \today }
+	}
+}{}
+

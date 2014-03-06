@@ -1,0 +1,29 @@
+%% LaTeX Title- and index- page
+% Mark Verleg, January 19th 2014
+
+%% TITLE PAGE
+% header page content
+\title{\longtitle}
+\author{\authorname \\ \departmentname}
+\date{\today}
+\maketitle
+
+% Abstract
+\begin{abstract}
+	Classical simulation of collision between rigid \cotwo\ and \co\ molecules using a neural network potential energy surface with previously obtained \latin{ab initio} energy values.
+\end{abstract}
+
+% concept version?
+\iftoggle{finalversion}{}{%
+	\begin{center}
+		~\\ ~\\ ~\\ ~\\ ~\\ ~\\
+		\rotatebox{22}{\textcolor{red}{\huge{CONCEPT VERSION}}}
+	\end{center}
+}
+
+\newpage
+
+%% TABLE OF CONTENT PAGE(S)
+\tableofcontents
+\newpage
+	
