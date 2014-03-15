@@ -8,7 +8,7 @@
     - call show() in __main__ (so it's not used when imported)
 '''
 
-from plot.mympl import MyMPL, close, show, subplots
+from mympl import MyMPL, close, show, subplots
 from numpy import linspace
 from numpy.random import rand
 

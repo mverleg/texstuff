@@ -11,14 +11,14 @@
 import sys
 from sys import argv
 from plot.mympl import MyMPL
-from settings import temp_dir, image_dir
+#from settings import temp_dir, image_dir
 from coordinates.raw_data import conv_raw_data
 from fitting.visualize_results import bar_error_minima
 from jobs.settings_fann import settings_fann
-
+from tempfile import mkstemp
 
 ''' initialize '''
-directory = argv[1] if len(argv) > 1 else image_dir
+directory = argv[1] if len(argv) > 1 else '.' #image_dir
 mympl = MyMPL.instance(extension = 'pgf', directory = directory, save_all = True)
 properties =  {
     'max_width': 6.17,
@@ -30,8 +30,9 @@ properties =  {
 }
 
 '''  stdout reirected to /tmp; (to print, use print >> old_stdout, 'your message') '''
-print 'redirected stdout to %s/img_gen.out; please wait patiently' % temp_dir
-old_stdout, sys.stdout = sys.stdout, open('%s/img_gen.out' % temp_dir, 'w+')
+fh, name = mkstemp(suffix='.out')
+print 'redirected stdout to %s/img_gen.out; please wait patiently' % name
+old_stdout, sys.stdout = sys.stdout, fh
 
 ''' order the images and call the functions that generate them '''
 mympl.order(label = 'EvsR_filtered_data', **properties)

@@ -9,7 +9,7 @@
 \togglefalse{finalversion}
 \renewcommand{\authorname}{Mark Verleg}
 \renewcommand{\departmentname}{DICP}
-\renewcommand{\departmentlogo}{dicp.jpg}
+\renewcommand{\departmentlogo}{radboud_dicp.png}
 \renewcommand{\shorttitle}{Interesting document}
 \renewcommand{\longtitle}{Amazingly interesting and fascinating document with annoyingly lengthy name}
 % shortcuts
@@ -17,6 +17,9 @@
 \newcommand{\cotwor}{CO_{2}}
 \newcommand{\co}{$CO$}
 \newcommand{\cor}{CO}
+
+%% REFERENCES
+\addbibresource{thchem.bib}
 
 %% BOTTOM HEADER
 \include{header2}
@@ -84,25 +87,6 @@
 			\frac{\sum_{i=1}^{n-1}N_{i}N_{i+1}}{\sum_{i=1}^{n} N_{i}}
 			\label{eq:equation_label}
 		\end{split} \end{equation}
-	
-\end{document}
-
-	\section[Chapter I]{Lengthy title of chapter I}
-		\begin{multicols}{2}
-			
-			\paragraph{}
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tempor gravida justo ac egestas. Sed consequat vehicula adipiscing. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed iaculis, nisi non consequat placerat, lectus magna fringilla leo, in elementum leo elit eget eros. Pellentesque sagittis nisl eu rutrum fermentum. Quisque quis arcu vulputate, rhoncus odio ac, vulputate purus. Aliquam posuere urna vitae gravida vulputate. Duis justo est, pretium nec tellus id, fringilla mattis purus. Sed et imperdiet leo. Aliquam auctor condimentum orci. Phasellus viverra turpis dui, commodo scelerisque massa rutrum vulputate. Suspendisse pellentesque, nisi et imperdiet suscipit, tellus lectus interdum nunc, ut cursus sapien enim vitae felis. Sed ultricies rhoncus nisl, et hendrerit justo semper ut.
-			
-		\end{multicols}
-	
-		\begin{equation} \begin{split}
-			\frac{\sum_{i=1}^{n-1}N_{i}N_{i+1}}{\sum_{i=1}^{n} N_{i}}
-			\label{eq:equation_label}
-		\end{split} \end{equation}
-		
-		\paragraph{}
-		font: \fontname\font\ \the\fontdimen6\font \\
-		line: \printinunitsof{in}\prntlen{\textwidth} \printinunitsof{in}\prntlen{\linewidth}
 		
 		\begin{figure}[ht]
 			\includegraphics[width=\linewidth,keepaspectratio]{demo.png}
@@ -116,16 +100,8 @@
 			\label{fig:pgf_label}
 		\end{figure}
 		
-		\begin{figure}[ht]
-			\includepdf{demo.pdf}
-			\caption{PGF; comparison of figure width and font size}
-			\label{fig:pgf_label}
-		\end{figure}
-		
-		
-		
-		
 \end{document}
+
 
 
 

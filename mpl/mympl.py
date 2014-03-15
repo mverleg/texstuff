@@ -18,9 +18,9 @@ from numpy import array, concatenate, ndarray
 from re import compile
 from os.path import join
 from types import MethodType, StringTypes
-from settings import image_dir
-from plot.mympl_ax import boynton_colors, color_cycle_scatter, small_pad_xlabel, small_pad_ylabel
-from plot.mympl_order import MPLorder
+#from settings import image_dir
+from mympl_ax import boynton_colors, color_cycle_scatter, small_pad_xlabel, small_pad_ylabel
+from mympl_order import MPLorder
 from collections import defaultdict
 
 
@@ -33,7 +33,7 @@ class MyMPL(object):
     max_width = 6.17
     
     ''' extension may also be a list of extensions '''
-    def __init__(self, save_all = False, extension = 'png', directory = image_dir):
+    def __init__(self, save_all = False, extension = 'png', directory = '.'):
         
         ''' operation settings '''
         self.save_all = save_all
