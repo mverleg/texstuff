@@ -52,10 +52,12 @@ $(imgtexs): %.tex: %.pgf
 
 # remove temporary tex files
 clean:
-	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out
+	mkdir .waste
+	/bin/mv *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste
 
 # remove temporary and result files (not source and not images)
 rm:	clean
-	/bin/rm -rf *.pdf $(imgtexs)
+	mkdir .waste
+	/bin/mv *.pdf $(imgtexs) .waste
 
 
