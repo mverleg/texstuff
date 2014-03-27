@@ -22,6 +22,8 @@
 \usepackage[hidelinks]{hyperref}	% allows using simple URLs without infinite escape chars
 \usepackage[backend=bibtex]{biblatex} % cite bibtex references
 \usepackage{caption}	% align figure captions
+\usepackage{braket}		% <a|b> notation, \Bra{}, \Braket{|}
+\usepackage{url}		% get urls to display normally
 % configure packages
 \captionsetup[figure]{slc=off}	% align figure captions left
 \newtoggle{electronic}
@@ -35,7 +37,7 @@
 \newcommand{\departmentlogo}{}
 \newcommand{\shorttitle}{Short title \textbackslash shorttitle}
 \newcommand{\longtitle}{Long title \textbackslash longtitle}
-\renewcommand{\abstract}{Abstract}
+%%\renewcommand{\abstract}{Abstract}
 % functionality
 \newcommand{\comment}[1]{}
 \newcommand{\todo}[0]{\textcolor{red}{ TODO }}

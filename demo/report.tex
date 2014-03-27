@@ -12,7 +12,6 @@
 \renewcommand{\departmentlogo}{radboud_dicp.png}
 \renewcommand{\shorttitle}{Interesting document}
 \renewcommand{\longtitle}{Amazingly interesting and fascinating document with annoyingly lengthy name}
-\renewcommand{\abstract}{}
 % shortcuts
 \newcommand{\cotwo}{$CO_{2}$}
 \newcommand{\cotwor}{CO_{2}}
@@ -70,8 +69,31 @@
 
 \begin{document}
 	
-	%% FRONT PAGE AND INDEX
-	\include{front}
+	%% TITLE PAGE
+	% header page content
+	\title{\longtitle}
+	\author{\authorname \\ \departmentname}
+	\date{\today}
+	\maketitle
+	
+	% Abstract
+	\begin{abstract}
+		
+	\end{abstract}
+	
+	% concept version?
+	\iftoggle{finalversion}{}{%
+		\begin{center}
+			~\\ ~\\ ~\\ ~\\ ~\\ ~\\
+			\rotatebox{22}{\textcolor{red}{\huge{CONCEPT VERSION}}}
+		\end{center}
+	}
+	
+	\newpage
+	
+	%% TABLE OF CONTENT PAGE(S)
+	\tableofcontents
+	\newpage
 	
 	%% CONTENT
 	\section[Short Section Title]{Long Section Title}
@@ -102,7 +124,5 @@
 		\end{figure}
 		
 \end{document}
-
-
 
 
