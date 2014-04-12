@@ -2,7 +2,7 @@
 % Mark Verleg, January 19th 2014
 
 % switch from some USA size to A4
-\documentclass[a4paper,twoside]{article}
+\documentclass[a4paper,twoside,UTF8]{article}
 
 %% PACKAGES
 % for missing packages, the lazy > 1GB way is: apt-get install texlive-full
@@ -24,11 +24,13 @@
 \usepackage{caption}	% align figure captions
 \usepackage{braket}		% <a|b> notation, \Bra{}, \Braket{|}
 \usepackage{url}		% get urls to display normally
+\usepackage{luaCJK}		% for foreign (CNY) character support
 % configure packages
 \captionsetup[figure]{slc=off}	% align figure captions left
 \newtoggle{electronic}
 \newtoggle{finalversion}
 \newtoggle{headers}
+\setCJKmainfont{AR PL UMing CN}	% on Ubuntu, use  fc-list :lang=zh  to find Chinese fonts
 
 %% DEFINITIONS
 % properties

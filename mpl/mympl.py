@@ -18,8 +18,7 @@ from numpy import array, concatenate, ndarray
 from re import compile
 from os.path import join
 from types import MethodType, StringTypes
-#from settings import image_dir
-from mympl_ax import boynton_colors, color_cycle_scatter, small_pad_xlabel, small_pad_ylabel
+from mympl_ax import boynton_colors, color_cycle_scatter, small_pad_xlabel, small_pad_ylabel, plotim
 from mympl_order import MPLorder
 from collections import defaultdict
 
@@ -149,6 +148,8 @@ class MyMPL(object):
             ax.custom_color_cycle = cycle(boynton_colors)
             ax.mono_color_scatter = ax.scatter
             ax.scatter = MethodType(color_cycle_scatter, ax, ax.__class__)
+            ''' special complex number version of plot '''
+            ax.plotim = MethodType(plotim, ax, ax.__class__)
             ''' label distances '''
             ax.big_pad_xlabel = ax.set_xlabel
             ax.set_xlabel = MethodType(small_pad_xlabel, ax, ax.__class__)
@@ -239,7 +240,7 @@ def subplots(*args, **kwargs):
 def show(*args, **kwargs):
     return MyMPL.instance().show(*args, **kwargs)
 
-''' opens and immediately closes figures; use instead of show (is already open use close_all) '''
+''' opens and immediately closes figures; use instead of show (if already open use close_all) '''
 def close(*args, **kwargs):
     return MyMPL.instance().close(*args, **kwargs)
 
