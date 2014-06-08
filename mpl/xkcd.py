@@ -18,15 +18,11 @@ class MyMPL(BaseMPL):
 	
 	def __init__(self, save_all = False, extension = 'png', directory = '.'):
 		super(MyMPL, self).__init__(save_all = save_all, extension = extension, directory = directory)
-		matplotlib.rcParams['text.usetex'] = True
+		matplotlib.rcParams['text.usetex'] = False
+		matplotlib.pyplot.xkcd()
 	
 	def default_font_properties(self):
-		return {
-			'family': 'cmr10',
-			'size': 10.0,
-			'weight': 'normal',
-			'style': 'normal',
-		}
+		return {}
 
 
 ''' non-class version like the normal MPL '''
