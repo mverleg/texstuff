@@ -1,6 +1,7 @@
 
 # use bash
-SHELL=/bin/bash
+SHELL = /bin/bash
+VPATH = $(TEXINPUTS)
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
@@ -27,6 +28,11 @@ imgpdfs = $(imgpgfs:.pgf=.pdf)
 # compile everything
 all: $(result).pdf
 	if [ -f "$(result).pdf" ]; then echo "use 'make show' to open the pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
+
+# debug info - subject to change
+debug:
+	@echo "SHELL:     $(SHELL)"
+	@echo "VPATH:     $(VPATH)"
 
 # compile everything and show
 show: $(result).pdf
@@ -57,5 +63,6 @@ clean:
 # remove temporary and result files (not source and not images)
 rm:	clean
 	/bin/rm -rf *.pdf $(imgtexs) .waste
+
 
 
