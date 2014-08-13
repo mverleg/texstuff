@@ -69,8 +69,11 @@ info:
 	@echo "bg:    build the report"
 	@echo "re:    clear and then rebuild the project"
 	@echo "clean: remove temporary build files"
-	@echo "rm:    remove all derived files"
+	@echo "rm:    remove many derived files (not images)"
+	@echo "imgs:  regenerate all images"
 	@echo ""
+	@echo "generated images don't check for updates in their dependencies (network of "
+	@echo "python files); they have to be manually regenerated using imgs or their filename"
 
 # debug info - subject to change
 debug:
@@ -103,6 +106,9 @@ clean:
 # remove temporary and result files (not source and not images)
 rm:	clean
 	/bin/rm -rf *.pdf $(imgtexs) $(report_imgs)
+
+imgs: $(report_imgs)
+	$(img_gen) $(gen_imgs)
 
 # compile the final .pdf using all the image .pdfs
 # repeat until there are no more rerun requests (max 5 times)

@@ -9,7 +9,7 @@ from bardeen.mpl.cmd_save import from_argv
 
 """ basenames: label, pypath, callable, kwargs """
 IMGMAP = {
-	('demo',): ('demo_image', 'report.demo.generate_demos', 'generate_demos', {}),
+	('demo',): ('demo_image', 'report.demo.generate', 'generate_demo_imgs', {}),
 	#('test', 'test2'): ('unordered_demo', 'generate_demos', 'generate_demos', {}),
 }
 
