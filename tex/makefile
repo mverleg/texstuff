@@ -1,8 +1,14 @@
 
+# this will find the latest v*.tex file and try to turn it into report.pdf
+# the input file is superficially scanned for required images; also any present .pgf files are rendered to .tex and
+# then .pdf automatically; anything still missing after that needs to be added manually
+# see 'make show'
+
 # use bash
+#VPATH = $(strip $(subst . ,,$(subst :, ,$(subst //,,$(TEXINPUTS))))) # needs subdirectories
 SHELL = /bin/bash
-#VPATH = $(strip $(subst . ,,$(subst :, ,$(subst //,,$(TEXINPUTS)))))
-VPATH = $(HOME)/mods/tex/report/tex
+REPORT_PATH = $(HOME)/mods/tex/report
+VPATH = $(REPORT_PATH)/tex
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
@@ -13,21 +19,34 @@ tex_comp = lualatex
 bib_comp = bibtex
 pdf_crop = pdfcrop
 pdf_viewer = evince
+img_gen = python images.py
 mode = -interaction=nonstopmode -halt-on-error
-opts = 
+opts =
 pipe = | grep -v "texmf"
 
-# directly included pdf files (ignore color coding)
-includes = $(shell cat $(source).tex | grep '\\include{.*}' | sed 's/.*include{\(.*\)}.*/\1/')
-incltexs = $(includes:=.tex)
+# removes comments and double quotes from input and stores it for searching
+input = $(shell sed 's/%.*$$//p' $(source).tex | sed 's/"//')
+# find images; grep finds input/includegraphics in (only) the main input file, then sed captures the filenames and
+# uniq removes duplicates; then department logo is appended
+images = $(shell echo "$(input)" | grep --only-matching --regexp \
+	'\\\(input\|includegraphics\)\(\[[^][]*\]\)\?{[^{}]\+}' | sed -n 's/.*{\(.*\)}.*/\1/p' | uniq) \
+	$(shell sed -n 's/.*{\\departmentlogo}{\([^{}]\+\)}.*/\1/p' $(source).tex)
+# find included pdf files; method similar to image search
+includes = $(shell echo "$(input)" | grep --only-matching --regexp '\\include{[^{}]*}' | sed 's/.*{\(.*\)}.*/\1.tex/' | uniq)
 
 # image files
-imgpgfs = $(wildcard *.pgf)
-imgtexs = $(imgpgfs:.pgf=.tex)
-imgpdfs = $(imgpgfs:.pgf=.pdf)
+img_pgfs = $(wildcard *.pgf)
+img_texs = $(img_pgfs:.pgf=.tex)
+img_pdfs = $(img_pgfs:.pgf=.pdf)
+report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*))
+gen_imgs = $(filter-out $(report_imgs),$(images))
 
-# compile everything
-all: $(result).pdf
+
+# default action to compile the whole project
+all: show $(img_pdfs)
+
+# compile everything without showing
+bg: $(result).pdf
 	@if [ -f "$(result).pdf" ]; then echo "use 'make show' to open the pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
 
 # compile everything and show
@@ -36,16 +55,58 @@ show: $(result).pdf
 
 # recompile
 re: rm show
+	@echo "clearing derived files and remaking project"
+
+# information
+info:
+	@echo ""
+	@echo "build the latest v*.tex file ($(source).tex) into $(result).pdf, "
+	@echo "trying to generate build dependencies such as pgf->pdf images and mpl generation"
+	@echo ""
+	@echo "info:  show this info"
+	@echo "debug: show debug info"
+	@echo "show:  build the report and open it [default]"
+	@echo "bg:    build the report"
+	@echo "re:    clear and then rebuild the project"
+	@echo "clean: remove temporary build files"
+	@echo "rm:    remove all derived files"
+	@echo ""
 
 # debug info - subject to change
 debug:
-	@echo "SHELL:     $(SHELL)"
-	@echo "VPATH:     $(VPATH)"
-	@echo "TEXINPUTS: $(TEXINPUTS)"
+	@echo "SHELL:       $(SHELL)"
+	@echo "REPORT_PATH: $(REPORT_PATH)"
+	@echo "VPATH:       $(VPATH)"
+	@echo "TEXINPUTS:   $(TEXINPUTS)"
+	@echo "source:      $(source)"
+	@echo "result:      $(result)"
+	@echo "tex_comp:    $(tex_comp)"
+	@echo "bib_comp:    $(bib_comp)"
+	@echo "pdf_crop:    $(pdf_crop)"
+	@echo "pdf_viewer:  $(pdf_viewer)"
+	@echo "img_gen:     $(img_gen)"
+	@echo "mode:        $(mode)"
+	@echo "opts:        $(opts)"
+	@echo "pipe:        $(pipe)"
+	@echo "img_pgfs:    $(img_pgfs)"
+	@echo "img_texs:    $(img_texs)"
+	@echo "img_pdfs:    $(img_pdfs)"
+	@echo "report_imgs: $(report_imgs)"
+	@echo "gen_imgs:    $(gen_imgs)"
+	@echo "images:      $(images)"
+	@echo "includes:    $(includes)"
+
+# remove temporary tex files
+clean:
+	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste *.pyc
+
+# remove temporary and result files (not source and not images)
+rm:	clean
+	/bin/rm -rf *.pdf $(imgtexs) $(report_imgs)
 
 # compile the final .pdf using all the image .pdfs
 # repeat until there are no more rerun requests (max 5 times)
-$(result).pdf: $(source).tex $(imgpdfs) $(incltexs)
+$(result).pdf: $(source).tex $(includes) $(images)
 	$(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe)
 	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
 	@if grep 'Please (re)run BibTeX' $(result).log; then $(bib_comp) $(result).aux; $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); fi;
@@ -53,21 +114,20 @@ $(result).pdf: $(source).tex $(imgpdfs) $(incltexs)
 	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; fi;
 
 # convert image .tex files to .pdf files
-$(imgpdfs): %.pdf: %.tex
+$(img_pdfs): %.pdf: %.tex
 	$(tex_comp) $(mode) $(opts) "$(basename $@).tex" $(pipe)
 	$(pdf_crop) $@ $@
 
 # convert image .pgf files to .tex files
-$(imgtexs): %.tex: %.pgf
+$(img_texs): %.tex: %.pgf
 	printf '\\include{header1} \\togglefalse{headers} \\usepackage{lipsum} \\include{header2} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(basename $@).tex"
 
-# remove temporary tex files
-clean:
-	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste
+# copy static images that are in report module
+$(report_imgs): %: $(REPORT_PATH)/img/%
+	cp -r $< $@
 
-# remove temporary and result files (not source and not images)
-rm:	clean
-	/bin/rm -rf *.pdf $(imgtexs)
-
+# generate images
+$(gen_imgs): %:
+	$(img_gen) $@
 
 
