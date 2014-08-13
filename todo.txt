@@ -1,4 +1,5 @@
 
 - post process script: remove "obviously", "clearly", etc
+- demo.bib
 
 
