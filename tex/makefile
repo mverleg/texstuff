@@ -1,7 +1,8 @@
 
 # use bash
 SHELL = /bin/bash
-VPATH = $(TEXINPUTS)
+#VPATH = $(strip $(subst . ,,$(subst :, ,$(subst //,,$(TEXINPUTS)))))
+VPATH = $(HOME)/mods/tex/report/tex
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
@@ -27,25 +28,29 @@ imgpdfs = $(imgpgfs:.pgf=.pdf)
 
 # compile everything
 all: $(result).pdf
-	if [ -f "$(result).pdf" ]; then echo "use 'make show' to open the pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
+	@if [ -f "$(result).pdf" ]; then echo "use 'make show' to open the pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
+
+# compile everything and show
+show: $(result).pdf
+	@if [ -f "$(result).pdf" ]; then $(pdf_viewer) $(result).pdf; else echo "no '$(result).pdf'; making failed?"; fi;
+
+# recompile
+re: rm show
 
 # debug info - subject to change
 debug:
 	@echo "SHELL:     $(SHELL)"
 	@echo "VPATH:     $(VPATH)"
-
-# compile everything and show
-show: $(result).pdf
-	if [ -f "$(result).pdf" ]; then $(pdf_viewer) $(result).pdf; else echo "no '$(result).pdf'; making failed?"; fi;
+	@echo "TEXINPUTS: $(TEXINPUTS)"
 
 # compile the final .pdf using all the image .pdfs
 # repeat until there are no more rerun requests (max 5 times)
 $(result).pdf: $(source).tex $(imgpdfs) $(incltexs)
 	$(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe)
-	k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
-	if grep 'Please (re)run BibTeX' $(result).log; then $(bib_comp) $(result).aux; $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); fi;
-	k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
-	if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; fi;
+	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
+	@if grep 'Please (re)run BibTeX' $(result).log; then $(bib_comp) $(result).aux; $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); fi;
+	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
+	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; fi;
 
 # convert image .tex files to .pdf files
 $(imgpdfs): %.pdf: %.tex
@@ -62,7 +67,7 @@ clean:
 
 # remove temporary and result files (not source and not images)
 rm:	clean
-	/bin/rm -rf *.pdf $(imgtexs) .waste
+	/bin/rm -rf *.pdf $(imgtexs)
 
 
 

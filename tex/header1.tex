@@ -24,13 +24,16 @@
 \usepackage{caption}	% align figure captions
 \usepackage{braket}		% <a|b> notation, \Bra{}, \Braket{|}
 \usepackage{url}		% get urls to display normally
-\usepackage{luaCJK}		% for foreign (CNY) character support
+\usepackage{fontspec}	% for setting fonts (for e.g. Chinese text)
+% \usepackage{luaCJK}		% for foreign (CNY) character support
+% \usepackage{fontspec}	% http://tex.stackexchange.com/questions/28642/frequently-loaded-packages-differences-between-pdflatex-and-lualatexx
+% \usepackage{polyglossia}	% for non-English languages
 % configure packages
 \captionsetup[figure]{slc=off}	% align figure captions left
 \newtoggle{electronic}
 \newtoggle{finalversion}
 \newtoggle{headers}
-\setCJKmainfont{AR PL UMing CN}	% on Ubuntu, use  fc-list :lang=zh  to find Chinese fonts
+% \setCJKmainfont{AR PL UMing CN}	% on Ubuntu, use  fc-list :lang=zh  to find Chinese fonts
 
 %% DEFINITIONS
 % properties
@@ -47,6 +50,7 @@
 \newcommand{\pgfimg}[1]{\includegraphics{#1.pdf}}
 \newcommand{\topwidemarker}[0]{\par\noindent\rule{\dimexpr(0.5\textwidth-0.5\columnsep-0.4pt)}{0.4pt}\rule{0.4pt}{6pt}}
 \newcommand{\bottomwidemarker}[0]{\vspace{\belowdisplayskip}\hfill\rule[-6pt]{0.4pt}{6.4pt}\rule{\dimexpr(0.5\textwidth-0.5\columnsep-1pt)}{0.4pt}}
+\newcommand{\cny}[1]{{\setmainfont{WenQuanYi Zen Hei} #1 }} % find Chinese fonts on Ubuntu: fc-list :lang=zh
 
 %% ALTERNATIVES
 % toggles

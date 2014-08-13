@@ -1,6 +1,6 @@
 
 '''
-    use MyMPL class to save figures for use in reports
+    use bardeen's MPL class to save figures for use in reports
     function should:
     - import subplots & show from mympl
     - preferably use 'label' argument to subplots that are to be saved
@@ -8,14 +8,14 @@
     - call show() in __main__ (so it's not used when imported)
 '''
 
-from mympl import MyMPL, close, show, subplots
+from bardeen.mpl.xkcd import xkcdMPL as MPL, close, show, subplots
 from numpy import linspace
 from numpy.random import rand
 
 
 ''' initialize '''
 directory = './'
-mpl = MyMPL.instance(extension = ['png', 'pgf'], directory = '.', save_all = False)
+mpl = MPL.instance(extension = ['png', 'pgf'], directory = '.', save_all = False)
 properties =  {
     'max_width': 6.17,
     'dpi': 600,
