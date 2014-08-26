@@ -7,7 +7,7 @@
 # use bash
 #VPATH = $(strip $(subst . ,,$(subst :, ,$(subst //,,$(TEXINPUTS))))) # needs subdirectories
 SHELL = /bin/bash
-REPORT_PATH = $(HOME)/mods/tex/report
+REPORT_PATH = $(HOME)/mods/TEX/report
 VPATH = $(REPORT_PATH)/tex
 
 # input file (latest matching v*.tex)
@@ -35,10 +35,10 @@ images = $(shell echo "$(input)" | grep --only-matching --regexp \
 includes = $(shell echo "$(input)" | grep --only-matching --regexp '\\include{[^{}]*}' | sed 's/.*{\(.*\)}.*/\1.tex/' | uniq)
 
 # image files
-img_pgfs = $(wildcard *.pgf)
+img_pgfs = $(sort $(wildcard *.pgf) $(filter %.pgf,$(images)))
 img_texs = $(img_pgfs:.pgf=.tex)
 img_pdfs = $(img_pgfs:.pgf=.pdf)
-report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*))
+report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*.pgf) $(wildcard $(REPORT_PATH)/img/*.jpg) $(wildcard $(REPORT_PATH)/img/*.png))
 gen_imgs = $(filter-out $(report_imgs),$(images))
 
 
@@ -72,8 +72,11 @@ info:
 	@echo "rm:    remove many derived files (not images)"
 	@echo "imgs:  regenerate all images"
 	@echo ""
+	@echo "other targets: $(result).pdf $(img_pdfs) $(report_imgs) $(gen_imgs)"
+	@echo ""
 	@echo "generated images don't check for updates in their dependencies (network of "
 	@echo "python files); they have to be manually regenerated using imgs or their filename"
+	@echo ""
 
 # debug info - subject to change
 debug:
@@ -98,6 +101,10 @@ debug:
 	@echo "gen_imgs:    $(gen_imgs)"
 	@echo "images:      $(images)"
 	@echo "includes:    $(includes)"
+	@echo ""
+	@echo "if there is no rule to make files like header*.tex, check that REPORT_PATH (top) is set "
+	@echo "correctly; currently it is set to $(REPORT_PATH) and tex/ contains: "
+	@echo "$(shell ls $(REPORT_PATH)/tex/)"
 
 # remove temporary tex files
 clean:
@@ -105,9 +112,10 @@ clean:
 
 # remove temporary and result files (not source and not images)
 rm:	clean
-	/bin/rm -rf *.pdf $(imgtexs) $(report_imgs)
+	/bin/rm -rf *.pdf $(img_pgfs) $(report_imgs)
 
-imgs: $(report_imgs)
+imgs:
+	cp -r $(addprefix $(REPORT_PATH)/img/,$(filter $(report_imgs),$(images))) .
 	$(img_gen) $(gen_imgs)
 
 # compile the final .pdf using all the image .pdfs

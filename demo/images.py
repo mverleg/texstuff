@@ -4,22 +4,25 @@
 	then call this script with image names as command line arguments
 """
 
-from bardeen.mpl.cmd_save import from_argv
+from bardeen.mpl.save import from_argv
 
 
-""" basenames: label, pypath, callable, kwargs """
-IMGMAP = {
-	('demo',): ('demo_image', 'report.demo.generate', 'generate_demo_imgs', {}),
-	#('test', 'test2'): ('unordered_demo', 'generate_demos', 'generate_demos', {}),
-}
-
-from_argv(IMGMAP, properties = {
+""" default image properties """
+properties = {
 	'max_width': 6.17,
 	'dpi': 300,
 	'font_name': 'cmr10',
 	'font_size': 10.0,
 	'font_weight': 'normal',
 	'font_style': 'normal',
-})
+}
+
+""" basenames: label, pypath, callable, kwargs, properties """
+IMGMAP = {
+	('demo',): ('demo_image', 'report.demo.generate', 'generate_demo_imgs', {}, properties),
+	#('test', 'test2'): ('unordered_demo', 'generate_demos', 'generate_demos', {}, properties),
+}
+
+from_argv(IMGMAP)
 
 

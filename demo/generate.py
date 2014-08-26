@@ -3,7 +3,7 @@
 	generate some demo images, as an example
 """
 
-from bardeen.mpl import subplots, show
+from bardeen.mpl import MPL, subplots, show
 from numpy import linspace
 from numpy.random import rand
 
