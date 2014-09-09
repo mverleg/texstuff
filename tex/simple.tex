@@ -1,0 +1,28 @@
+%% LaTeX BOTTOM general header for style and packages
+% Mark Verleg
+
+\input{docbase}
+
+
+%% HEADER & FOOTER
+\iftoggle{headers}{%
+	% hope '\leftmark' is always the short section title, because I can't find a direct reference...
+	\pagestyle{fancy}
+	\renewcommand{\headrulewidth}{0.2pt}
+	\renewcommand{\footrulewidth}{0.0pt}
+	\fancyhead[R]{page \thepage\ of \pageref{LastPage}}
+	\fancyfoot[L,C,R]{}
+	% some header and footer even/odd changes for printed format
+	\iftoggle{electronic}{%
+		\fancyhead[LE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+	}{%
+		\fancyhead[RE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+	}
+}{}
+
+% commands
+\newcommand{\exercise}[1]{\begin{quote} \emph{ #1 } \end{quote}}
+
+

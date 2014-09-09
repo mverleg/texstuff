@@ -1,0 +1,37 @@
+%% LaTeX BOTTOM general header for style and packages
+% Mark Verleg
+
+\input{docbase}
+
+
+%% HEADER & FOOTER
+\iftoggle{headers}{%
+	% hope '\leftmark' is always the short section title, because I can't find a direct reference...
+	\pagestyle{fancy}
+	\renewcommand{\headrulewidth}{0.2pt}
+	\renewcommand{\footrulewidth}{0.0pt}
+	\fancyhead[C]{page \thepage\ of \pageref{LastPage}}
+	\fancyfoot[L,C]{}
+	% some header and footer even/odd changes for printed format
+	\iftoggle{electronic}{%
+		\fancyhead[LE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+		\fancyhead[R]{\leftmark}
+		\ifdefempty{\departmentlogo}{}{
+			\fancyfoot[R]{\raisebox{-1.0\height}{\includegraphics[height=0.8in,keepaspectratio]{\departmentlogo}}}
+		}
+	}{%
+		\fancyhead[RE]{\authorname , \departmentname}
+		\fancyhead[LO]{\MakeUppercase{\shorttitle}}
+		\fancyhead[LE,RO]{\leftmark}
+		\ifdefempty{\departmentlogo}{}{
+			\fancyfoot[RO]{\raisebox{-1.0\height}{\includegraphics[height=0.8in,keepaspectratio]{\departmentlogo}}}
+		}
+	}
+	% add 'concept version' footer if this is, in fact, a concept version
+	\iftoggle{finalversion}{}{%
+		\fancyfoot[L]{\textcolor{red}{\\ \MakeUppercase{Concept version}} \\ \today }
+	}
+}{}
+
+
