@@ -1,8 +1,19 @@
-%% LaTeX BOTTOM general header for style and packages
-% Mark Verleg
 
-\input{docbase}
+%% TeX settings for article layout.
 
+
+%% PAGE LAYOUT
+% margin different for paper and electronic form
+\iftoggle{electronic}{%
+	\setboolean{@twoside}{false}
+}{}
+
+% two-column layout (multicol package) because long lines are apparently bad, but default margins are crazy
+% use \begin{multicols}{2} ... \end{multicols} and place images outside that
+\addtolength{\oddsidemargin}{-0.7in}
+\addtolength{\evensidemargin}{-0.7in}
+\addtolength{\textwidth}{1.4in}
+\setlength{\columnsep}{0.5in}
 
 %% HEADER & FOOTER
 \iftoggle{headers}{%
@@ -33,5 +44,12 @@
 		\fancyfoot[L]{\textcolor{red}{\\ \MakeUppercase{Concept version}} \\ \today }
 	}
 }{}
+
+%% DEFAULT VALUES
+\newcommand{\authorname}{Mark Verleg \textbackslash authorname}
+\newcommand{\departmentname}{Department \textbackslash departmentname}
+\newcommand{\departmentlogo}{}
+\newcommand{\shorttitle}{Short title \textbackslash shorttitle}
+\newcommand{\longtitle}{Long title \textbackslash longtitle}
 
 
