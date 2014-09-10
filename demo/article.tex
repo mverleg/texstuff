@@ -9,6 +9,9 @@
 \include{packages_minimal}
 \include{packages_extra}
 
+%% LAYOUT SETTINGS
+\include{layout_article}
+
 %% DEFINITIONS
 % properties
 \toggletrue{finalversion}
@@ -23,9 +26,6 @@
 
 %% REFERENCES
 \addbibresource{library.bib}
-
-%% LAYOUT SETTINGS
-\include{layout_article}
 
 %% DOCUMENT
 \begin{document}
@@ -42,7 +42,7 @@
 
 	\end{abstract}
 
-	% Concept version?
+	% concept version?
 	\iftoggle{finalversion}{}{%
 		\begin{center}
 			~\\ ~\\ ~\\ ~\\ ~\\ ~\\

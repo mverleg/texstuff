@@ -6,43 +6,17 @@
 \documentclass[a4paper,UTF8]{article}
 
 %% TOP HEADER
-\include{minimal}
-% \include{extra}
-
-%% CUSTOM COMMANDS
-\include{commands}
+\include{packages_minimal}
+% \include{packages_extra}
 
 %% LAYOUT SETTINGS
 \include{layout_report}
 
+%% CUSTOM COMMANDS
+\include{commands}
+
 %% DOCUMENT
 \begin{document}
-
-	%% TITLE PAGE
-	% header page content
-	\title{\longtitle}
-	\author{\authorname \\ \departmentname}
-	\date{\today}
-	\maketitle
-
-	% Abstract
-	\begin{abstract}
-
-	\end{abstract}
-
-	% concept version?
-	\iftoggle{finalversion}{}{%
-		\begin{center}
-			~\\ ~\\ ~\\ ~\\ ~\\ ~\\
-			\rotatebox{22}{\textcolor{red}{\huge{CONCEPT VERSION}}}
-		\end{center}
-	}
-
-	\newpage
-
-	%% TABLE OF CONTENT PAGE(S)
-	\tableofcontents
-	\newpage
 
 	%% CONTENT
 	\section{Long Section Title}
@@ -52,9 +26,8 @@
 			\exercise{Lorum ipsum?}
 		
 		\paragraph{}
-			font: \fontname\font\ \the\fontdimen6\font
-			\\
-			line: \printinunitsof{in}\prntlen{\textwidth} \printinunitsof{in}\prntlen{\linewidth}
+			
+			Lorum Ipsum!
 
 		\begin{equation} \begin{split}
 			\frac{\sum_{i=1}^{n-1}N_{i}N_{i+1}}{\sum_{i=1}^{n} N_{i}}
