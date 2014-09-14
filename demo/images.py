@@ -5,7 +5,9 @@
 """
 
 from bardeen.mpl.save import from_argv
+from sys import path
 
+# path.append('../code')
 
 """ default image properties """
 properties = {
@@ -19,6 +21,7 @@ properties = {
 
 """ basenames: label, pypath, callable, kwargs, properties """
 IMGMAP = {
+	#(basename,): (label, pypath, function, kwargs),
 	('demo',): ('demo_image', 'report.demo.generate', 'generate_demo_imgs', {}, properties),
 	#('test', 'test2'): ('unordered_demo', 'generate_demos', 'generate_demos', {}, properties),
 }
