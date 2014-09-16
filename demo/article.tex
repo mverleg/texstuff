@@ -134,4 +134,18 @@
 %		\item
 %	\end{enumerate}
 
+%% CODE
+% include python statements or their result; everything is cached automatically; namespaces are parallel
+% available commands:
+% 	\py{2+2}	       runs code with all output (like interactive python interpreter)
+% 	\pyc{print 2+2}    runs code and shows stdout, like print statements; \begin{pycode}[namespace]
+% 	\pyv{q = 42}       shows formatted python code; \begin{pyverbatim}[namespace]
+% 	\pyb{q = 42}       shows formatted python code and runs it without output; \begin{pyblock}[namespace]
+% 	\stdoutpythontex   shows output from the below
+%	\begin{pyconsole}  emulates console python prompt (with >> and output)
+
+% e.g. to show code and it's output:
+%	\pyb{V = D * (1 - exp(x - x_e))**2} \pyc{print V}
+% The utilities class also allows information such as page width to be passed from the TEX side to Python/other languages.
+
 

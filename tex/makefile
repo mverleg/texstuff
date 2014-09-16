@@ -17,6 +17,7 @@ source = $(basename $(shell ls -t v*.tex | head -1))
 result = report
 tex_comp = lualatex
 bib_comp = bibtex
+python_comp = pythontex --interpreter python:python2 
 pdf_crop = pdfcrop
 pdf_viewer = evince
 img_gen = python images.py
@@ -41,6 +42,9 @@ img_pdfs = $(img_pgfs:.pgf=.pdf)
 report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*.pgf) $(wildcard $(REPORT_PATH)/img/*.jpg) $(wildcard $(REPORT_PATH)/img/*.png))
 gen_imgs = $(filter-out $(report_imgs),$(images))
 
+# alias
+compile = $(tex_comp) $(mode) $(opts) -jobname="$(result)" "$(source).tex" $(pipe)
+
 
 # default action to compile the whole project
 all: show $(img_pdfs)
@@ -51,7 +55,7 @@ bg: $(result).pdf
 
 # compile everything and show
 show: $(result).pdf
-	@if [ -f "$(result).pdf" ]; then $(pdf_viewer) $(result).pdf; else echo "no '$(result).pdf'; making failed?"; fi;
+	@if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
 
 # recompile
 re: rm show
@@ -60,17 +64,19 @@ re: rm show
 # information
 info:
 	@echo ""
-	@echo "build the latest v*.tex file ($(source).tex) into $(result).pdf, "
-	@echo "trying to generate build dependencies such as pgf->pdf images and mpl generation"
+	@echo "build the latest v*.tex file ($(source).tex) into $(result).pdf, while trying"
+	@echo "to generate build dependencies such as pgf->pdf images and mpl generation"
 	@echo ""
-	@echo "info:  show this info"
-	@echo "debug: show debug info"
-	@echo "show:  build the report and open it [default]"
-	@echo "bg:    build the report"
-	@echo "re:    clear and then rebuild the project"
-	@echo "clean: remove temporary build files"
-	@echo "rm:    remove many derived files (not images)"
-	@echo "imgs:  regenerate all images"
+	@echo "info:   show this info"
+	@echo "debug:  show debug info"
+	@echo "show:   build the report and open it [default]"
+	@echo "bg:     build the report"
+	@echo "re:     clear and then rebuild the project"
+	@echo "single: one compile iteration (possibly missing references)"
+	@echo "merge:  resolve all inputs and replace python by output"
+	@echo "clean:  remove temporary build files"
+	@echo "rm:     remove many derived files (not images)"
+	@echo "imgs:   regenerate all images"
 	@echo ""
 	@echo "other targets: $(result).pdf $(img_pdfs) $(report_imgs) $(gen_imgs)"
 	@echo ""
@@ -94,6 +100,7 @@ debug:
 	@echo "mode:        $(mode)"
 	@echo "opts:        $(opts)"
 	@echo "pipe:        $(pipe)"
+	@echo "compile:     $(compile)"
 	@echo "img_pgfs:    $(img_pgfs)"
 	@echo "img_texs:    $(img_texs)"
 	@echo "img_pdfs:    $(img_pdfs)"
@@ -108,7 +115,7 @@ debug:
 
 # remove temporary tex files
 clean:
-	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste *.pyc
+	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste *.pyc *.pytxcode pythontex-files-*
 
 # remove temporary and result files (not source and not images)
 rm:	clean
@@ -121,11 +128,27 @@ imgs:
 # compile the final .pdf using all the image .pdfs
 # repeat until there are no more rerun requests (max 5 times)
 $(result).pdf: $(source).tex $(includes) $(images)
-	$(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe)
-	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
-	@if grep 'Please (re)run BibTeX' $(result).log; then $(bib_comp) $(result).aux; $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); fi;
-	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(tex_comp) $(mode) $(opts) -jobname=$(result) $(source).tex $(pipe); ((k++)); done
+	$(compile)
+	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
+	@if grep 'Please (re)run BibTeX' "$(result).log"; then $(bib_comp) "$(result).aux"; $(compile); fi;
+	@if grep 'pythontex.sty' "$(result).log"; then $(python_comp) "$(result).pytxcode"; $(compile); fi;
+	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
 	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; fi;
+
+# single run compile; may have missing page numbers and references, but faster
+single: "$(source).tex" $(includes) $(images)
+	$(compile)
+	@if grep 'Please (re)run BibTeX' "$(result).log"; then $(bib_comp) "$(result).aux"; fi;
+	@if grep 'pythontex.sty' "$(result).log"; then $(python_comp) "$(result).pytxcode"; fi;
+	@if grep 'Please (re)run BibTeX' "$(result).log" "$(result).log" || grep 'pythontex.sty' "$(result).log"; then $(compile); fi;
+	@if grep 'Rerun to get ' "$(result).log"; then echo "document needs to be compiled again"; fi
+	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; else $(pdf_viewer) "$(result).pdf"; fi;
+
+# resolve all includes to create one single document, and replace all python code by it's output
+flatten: "$(source).tex" $(includes)
+	@echo "NOT YET IMPLEMENTED!"
+	# flatex
+	# depythontex
 
 # convert image .tex files to .pdf files
 $(img_pdfs): %.pdf: %.tex
