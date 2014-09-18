@@ -129,7 +129,7 @@ imgs:
 # repeat until there are no more rerun requests (max 5 times)
 $(result).pdf: $(source).tex $(includes) $(images)
 	$(compile)
-	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
+	#@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
 	@if grep 'Please (re)run BibTeX' "$(result).log"; then $(bib_comp) "$(result).aux"; $(compile); fi;
 	@if grep 'pythontex.sty' "$(result).log"; then $(python_comp) "$(result).pytxcode"; $(compile); fi;
 	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
@@ -157,7 +157,7 @@ $(img_pdfs): %.pdf: %.tex
 
 # convert image .pgf files to .tex files
 $(img_texs): %.tex: %.pgf
-	printf '\\include{header1} \\togglefalse{headers} \\usepackage{lipsum} \\include{header2} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(basename $@).tex"
+	printf '\\documentclass[a4paper,UTF8]{article} \\include{packages_minimal} \\usepackage{tikz} \\usepackage{pgf} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(basename $@).tex"
 
 # copy static images that are in report module
 $(report_imgs): %: $(REPORT_PATH)/img/%
