@@ -3,6 +3,6 @@
 - demo.bib
 - what happens if the generating scripts use xkcd but the collector uses MyMPL?
 - make merge: should resolve all imports and make one big document (for sending)
-- 
-
+- images.py default fallback where label and module are the same as image filename ext
+- makefile: sed doesn't natch pgf
 
