@@ -119,7 +119,7 @@ clean:
 
 # remove temporary and result files (not source and not images)
 rm:	clean
-	/bin/rm -rf *.pdf $(img_pgfs) $(report_imgs)
+	/bin/rm -rf *.pdf $(img_pgfs) $(report_imgs) flat.tex
 
 imgs:
 	cp -r $(addprefix $(REPORT_PATH)/img/,$(filter $(report_imgs),$(images))) .
@@ -147,7 +147,8 @@ single: "$(source).tex" $(includes) $(images)
 # resolve all includes to create one single document, and replace all python code by it's output
 flatten: $(source).tex $(includes)
 	python ~/mods/flattentex/flatex.py "$(source).tex" > flat.tex
-	# depythontex
+	@echo "REMOVING PYTHON WITH depythontex NOT IMPLEMENTED"
+	$(compile)
 
 # convert image .tex files to .pdf files
 $(img_pdfs): %.pdf: %.tex
