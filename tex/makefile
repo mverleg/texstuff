@@ -145,9 +145,8 @@ single: "$(source).tex" $(includes) $(images)
 	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; else $(pdf_viewer) "$(result).pdf"; fi;
 
 # resolve all includes to create one single document, and replace all python code by it's output
-flatten: "$(source).tex" $(includes)
-	@echo "NOT YET IMPLEMENTED!"
-	# flatex
+flatten: $(source).tex $(includes)
+	python ~/mods/flattentex/flatex.py "$(source).tex" > flat.tex
 	# depythontex
 
 # convert image .tex files to .pdf files

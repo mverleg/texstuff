@@ -1,4 +1,5 @@
 
+- more compiles after showing?
 - post process script: remove "obviously", "clearly", etc
 - demo.bib
 - what happens if the generating scripts use xkcd but the collector uses MyMPL?
