@@ -9,7 +9,7 @@
 SHELL = /bin/bash
 REPORT_PATH = $(HOME)/mods/TEX/report
 VPATH = $(REPORT_PATH)/tex
-TMPDIR = "textmp~"
+TMPDIR = textmp~
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
@@ -38,8 +38,9 @@ includes = $(shell echo "$(input)" | grep --only-matching --regexp '\\include{[^
 
 # image files
 img_pgfs = $(sort $(wildcard *.pgf) $(filter %.pgf,$(images)))
-img_texs = $(img_pgfs:.pgf=.tex)
-img_pdfs = $(img_pgfs:.pgf=.pdf)
+img_pgf_tmps = $(addprefix $(TMPDIR)/,$(img_pgfs))
+img_texs = $(addprefix $(TMPDIR)/,$(img_pgfs:.pgf=.tex))
+img_pdfs = $(addprefix $(TMPDIR)/,$(img_pgfs:.pgf=.pdf))
 report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*.pgf) $(wildcard $(REPORT_PATH)/img/*.jpg) $(wildcard $(REPORT_PATH)/img/*.png))
 gen_imgs = $(filter-out $(report_imgs),$(images))
 
@@ -50,7 +51,7 @@ bibtex_cmd = if grep 'Please (re)run BibTeX' "$(TMPDIR)/$(result).log"; then /bi
 pytex_cmd = if grep 'pythontex.sty' "$(TMPDIR)/$(result).log"; then $(python_comp) "$(TMPDIR)/$(result).pytxcode"; fi;
 recompile_cmd = @if grep 'Please (re)run BibTeX' "$(logfile)" || grep 'pythontex.sty' "$(logfile)"; then $(compile_cmd); fi;
 mv_cmd = if ! ( grep 'no output PDF file produced' "$(TMPDIR)/$(result).log" ); then /bin/mv "$(TMPDIR)/$(result).pdf" "$(result).pdf"; fi;
-show_cmd = @if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
+show_cmd = @if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'\; making failed?"; fi;
 
 
 # default action to compile the whole project
@@ -93,6 +94,9 @@ info:
 
 # debug info - subject to change
 debug:
+	@echo ""
+	@echo "building latest .tex file: $(source).tex"
+	@echo ""
 	@echo "SHELL:       $(SHELL)"
 	@echo "REPORT_PATH: $(REPORT_PATH)"
 	@echo "VPATH:       $(VPATH)"
@@ -108,8 +112,15 @@ debug:
 	@echo "mode:        $(mode)"
 	@echo "opts:        $(opts)"
 	@echo "pipe:        $(pipe)"
+	@echo "logfile:     $(logfile)"
 	@echo "compile_cmd: $(compile_cmd)"
+	@echo "bibtex_cmd:  $(bibtex_cmd)"
+	@echo "pytex_cmd:   $(pytex_cmd)"
+	@echo "recompile_cmd:$(recompile_cmd)"
+	@echo "mv_cmd:      $(mv_cmd)"
+	@echo "show_cmd:    $(show_cmd)"
 	@echo "img_pgfs:    $(img_pgfs)"
+	@echo "img_pgf_tmps:$(img_pgf_tmps)"
 	@echo "img_texs:    $(img_texs)"
 	@echo "img_pdfs:    $(img_pdfs)"
 	@echo "report_imgs: $(report_imgs)"
@@ -123,7 +134,7 @@ debug:
 
 # remove temporary tex files
 clean:
-	/bin/rm -rf "$(TMPDIR)" $(img_texs) "$(result).pdf"
+	/bin/rm -rf "$(TMPDIR)" $(img_texs) "$(result).pdf" flat.tex
 
 # remove temporary and result files (not source and not images)
 rm:	clean
@@ -164,12 +175,17 @@ flatten: $(source).tex $(includes)
 # convert image .tex files to .pdf files
 $(img_pdfs): %.pdf: %.tex
 	mkdir -p $(TMPDIR)
-	$(tex_comp) $(mode) $(opts) "$(TMPDIR)/$(basename $@).tex" $(pipe)
-	$(pdf_crop) "$(TMPDIR)/$@" "$(TMPDIR)/$@"
+	$(tex_comp) $(mode) $(opts) "$(notdir $^)" $(pipe)
+	$(pdf_crop) "$@" "$@"
+
+$(img_pgf_tmps): $(img_pgfs)
+	mkdir -p $(TMPDIR)
+	/bin/rm -f "$@"; /bin/ln "$(notdir $@)" "$@"
 
 # convert image .pgf files to .tex files
 $(img_texs): %.tex: %.pgf
-	printf '\\documentclass[a4paper,UTF8]{article} \\include{packages_minimal} \\usepackage{tikz} \\usepackage{pgf} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(TMPDIR)/$(basename $@).tex"
+	mkdir -p $(TMPDIR)
+	printf '\\documentclass[a4paper,UTF8]{article} \\include{packages_minimal} \\usepackage{tikz} \\usepackage{pgf} \\begin{document} \\pagenumbering{gobble} \\input{$(notdir $^)} \\end{document}' > "$@"
 
 # copy static images that are in report module
 $(report_imgs): %: $(REPORT_PATH)/img/%
@@ -178,5 +194,8 @@ $(report_imgs): %: $(REPORT_PATH)/img/%
 # generate images
 $(gen_imgs): %:
 	$(img_gen) $@
+
+$(TMPDIR):
+	mkdir -p "$(TMPDIR)"
 
 
