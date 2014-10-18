@@ -13,7 +13,7 @@ from sys import path
 properties = {
 	'max_width': 6.17,
 	'dpi': 300,
-	'font_name': 'cmr10',
+#	'font_name': 'cmr10',
 	'font_size': 10.0,
 	'font_weight': 'normal',
 	'font_style': 'normal',

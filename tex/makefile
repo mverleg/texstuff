@@ -9,6 +9,7 @@
 SHELL = /bin/bash
 REPORT_PATH = $(HOME)/mods/TEX/report
 VPATH = $(REPORT_PATH)/tex
+TMPDIR = "textmp~"
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
@@ -17,12 +18,12 @@ source = $(basename $(shell ls -t v*.tex | head -1))
 result = report
 tex_comp = lualatex
 bib_comp = bibtex
-python_comp = pythontex --interpreter python:python2 
+python_comp = pythontex --interpreter python:python2
 pdf_crop = pdfcrop
 pdf_viewer = evince
 img_gen = python images.py
 mode = -interaction=nonstopmode -halt-on-error
-opts =
+opts = -output-directory=$(TMPDIR)
 pipe = | grep -v "texmf"
 
 # removes comments and double quotes from input and stores it for searching
@@ -43,7 +44,13 @@ report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*.pgf) $(wildcard $(REPORT_
 gen_imgs = $(filter-out $(report_imgs),$(images))
 
 # alias
-compile = $(tex_comp) $(mode) $(opts) -jobname="$(result)" "$(source).tex" $(pipe)
+logfile = $(TMPDIR)/$(result).log
+compile_cmd = $(tex_comp) $(mode) $(opts) -jobname="$(result)" "$(source).tex" $(pipe)
+bibtex_cmd = if grep 'Please (re)run BibTeX' "$(TMPDIR)/$(result).log"; then /bin/cd "$(TMPDIR)"; $(bib_comp) "$(result).aux"; fi;
+pytex_cmd = if grep 'pythontex.sty' "$(TMPDIR)/$(result).log"; then $(python_comp) "$(TMPDIR)/$(result).pytxcode"; fi;
+recompile_cmd = @if grep 'Please (re)run BibTeX' "$(logfile)" || grep 'pythontex.sty' "$(logfile)"; then $(compile_cmd); fi;
+mv_cmd = if ! ( grep 'no output PDF file produced' "$(TMPDIR)/$(result).log" ); then /bin/mv "$(TMPDIR)/$(result).pdf" "$(result).pdf"; fi;
+show_cmd = @if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
 
 
 # default action to compile the whole project
@@ -55,7 +62,7 @@ bg: $(result).pdf
 
 # compile everything and show
 show: $(result).pdf
-	@if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'; making failed?"; fi;
+	$(show_cmd)
 
 # recompile
 re: rm show
@@ -90,6 +97,7 @@ debug:
 	@echo "REPORT_PATH: $(REPORT_PATH)"
 	@echo "VPATH:       $(VPATH)"
 	@echo "TEXINPUTS:   $(TEXINPUTS)"
+	@echo "TMPDIR:      $(TMPDIR)"
 	@echo "source:      $(source)"
 	@echo "result:      $(result)"
 	@echo "tex_comp:    $(tex_comp)"
@@ -100,7 +108,7 @@ debug:
 	@echo "mode:        $(mode)"
 	@echo "opts:        $(opts)"
 	@echo "pipe:        $(pipe)"
-	@echo "compile:     $(compile)"
+	@echo "compile_cmd: $(compile_cmd)"
 	@echo "img_pgfs:    $(img_pgfs)"
 	@echo "img_texs:    $(img_texs)"
 	@echo "img_pdfs:    $(img_pdfs)"
@@ -115,49 +123,53 @@ debug:
 
 # remove temporary tex files
 clean:
-	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste *.pyc *.pytxcode pythontex-files-*
+	/bin/rm -rf "$(TMPDIR)" $(img_texs) "$(result).pdf"
 
 # remove temporary and result files (not source and not images)
 rm:	clean
-	/bin/rm -rf *.pdf $(img_pgfs) $(report_imgs) flat.tex
+	/bin/rm -rf *.log *.aux *.toc *-blx.bib *.run.xml *.bbl *.blg *.out .waste *.pyc *.pytxcode pythontex-files-*
+	/bin/rm -rf *.pdf $(img_pgfs) $(gen_imgs) $(report_imgs)
 
 imgs:
 	cp -r $(addprefix $(REPORT_PATH)/img/,$(filter $(report_imgs),$(images))) .
 	$(img_gen) $(gen_imgs)
 
-# compile the final .pdf using all the image .pdfs
-# repeat until there are no more rerun requests (max 5 times)
-$(result).pdf: $(source).tex $(includes) $(images)
-	$(compile)
-	#@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
-	@if grep 'Please (re)run BibTeX' "$(result).log"; then $(bib_comp) "$(result).aux"; $(compile); fi;
-	@if grep 'pythontex.sty' "$(result).log"; then $(python_comp) "$(result).pytxcode"; $(compile); fi;
-	@k=1; while [ $$k -le 5 ] && grep 'Rerun to get ' "$(result).log"; do $(compile); ((k++)); done
-	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; fi;
+# compile the final .pdf using all the image .pdfs (repeating to get references right)
+$(result).pdf: $(includes) $(images) $(source).tex
+	mkdir -p $(TMPDIR)
+	$(compile_cmd)
+	$(bibtex_cmd)
+	$(pytex_cmd)
+	$(recompile_cmd)
+	k=3; while [ $$k -gt 0 ] && grep 'Rerun to get ' "$(logfile)"; do $(compile_cmd); ((k++)); done
+	$(mv_cmd)
 
 # single run compile; may have missing page numbers and references, but faster
-single: "$(source).tex" $(includes) $(images)
-	$(compile)
-	@if grep 'Please (re)run BibTeX' "$(result).log"; then $(bib_comp) "$(result).aux"; fi;
-	@if grep 'pythontex.sty' "$(result).log"; then $(python_comp) "$(result).pytxcode"; fi;
-	@if grep 'Please (re)run BibTeX' "$(result).log" "$(result).log" || grep 'pythontex.sty' "$(result).log"; then $(compile); fi;
-	@if grep 'Rerun to get ' "$(result).log"; then echo "document needs to be compiled again"; fi
-	@if [ -f "$(result).pdf" ] && grep 'no output PDF file produced' "$(result).log"; then /bin/rm -rf "$(result).pdf"; else $(pdf_viewer) "$(result).pdf"; fi;
+single: $(includes) $(images) $(source).tex
+	mkdir -p $(TMPDIR)
+	$(compile_cmd)
+	$(bibtex_cmd)
+	$(pytex_cmd)
+	$(recompile_cmd)
+	$(mv_cmd)
+	$(show_cmd)
 
 # resolve all includes to create one single document, and replace all python code by it's output
 flatten: $(source).tex $(includes)
+	mkdir -p $(TMPDIR)
 	python ~/mods/flattentex/flatex.py "$(source).tex" > flat.tex
 	@echo "REMOVING PYTHON WITH depythontex NOT IMPLEMENTED"
-	$(compile)
+	$(compile_cmd)
 
 # convert image .tex files to .pdf files
 $(img_pdfs): %.pdf: %.tex
-	$(tex_comp) $(mode) $(opts) "$(basename $@).tex" $(pipe)
-	$(pdf_crop) $@ $@
+	mkdir -p $(TMPDIR)
+	$(tex_comp) $(mode) $(opts) "$(TMPDIR)/$(basename $@).tex" $(pipe)
+	$(pdf_crop) "$(TMPDIR)/$@" "$(TMPDIR)/$@"
 
 # convert image .pgf files to .tex files
 $(img_texs): %.tex: %.pgf
-	printf '\\documentclass[a4paper,UTF8]{article} \\include{packages_minimal} \\usepackage{tikz} \\usepackage{pgf} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(basename $@).tex"
+	printf '\\documentclass[a4paper,UTF8]{article} \\include{packages_minimal} \\usepackage{tikz} \\usepackage{pgf} \\begin{document} \\pagenumbering{gobble} \\input{$(basename $@).pgf} \\end{document}' > "$(TMPDIR)/$(basename $@).tex"
 
 # copy static images that are in report module
 $(report_imgs): %: $(REPORT_PATH)/img/%
