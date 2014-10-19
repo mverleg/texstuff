@@ -30,6 +30,8 @@ pipe = | grep -v "texmf"
 input = $(shell sed 's/%.*$$//p' $(source).tex | sed 's/"//')
 # find images; grep finds input/includegraphics in (only) the main input file, then sed captures the filenames and
 # uniq removes duplicates; then department logo is appended
+pgfs = $(addsuffix .pgf,$(sort $(shell echo "$(input)" | grep --only-matching --regexp \
+	'\\pgfimg\(\[[^][]*\]\)\?{[^{}]\+}' | sed -n 's/.*{\(.*\)}.*/\1/p' | uniq)))
 images = $(shell echo "$(input)" | grep --only-matching --regexp \
 	'\\\(input\|includegraphics\)\(\[[^][]*\]\)\?{[^{}]\+}' | sed -n 's/.*{\(.*\)}.*/\1/p' | uniq) \
 	$(shell sed -n 's/.*{\\departmentlogo}{\([^{}]\+\)}.*/\1/p' $(source).tex)
@@ -37,12 +39,11 @@ images = $(shell echo "$(input)" | grep --only-matching --regexp \
 includes = $(shell echo "$(input)" | grep --only-matching --regexp '\\include{[^{}]*}' | sed 's/.*{\(.*\)}.*/\1.tex/' | uniq)
 
 # image files
-img_pgfs = $(sort $(wildcard *.pgf) $(filter %.pgf,$(images)))
-img_pgf_tmps = $(addprefix $(TMPDIR)/,$(img_pgfs))
-img_texs = $(addprefix $(TMPDIR)/,$(img_pgfs:.pgf=.tex))
-img_pdfs = $(addprefix $(TMPDIR)/,$(img_pgfs:.pgf=.pdf))
+img_pgfs = $(addprefix $(TMPDIR)/,$(pgfs))
+img_texs = $(img_pgfs:.pgf=.tex)
+img_pdfs = $(img_pgfs:.pgf=.pdf)
 report_imgs = $(notdir $(wildcard $(REPORT_PATH)/img/*.pgf) $(wildcard $(REPORT_PATH)/img/*.jpg) $(wildcard $(REPORT_PATH)/img/*.png))
-gen_imgs = $(filter-out $(report_imgs),$(images))
+gen_imgs = $(filter-out $(report_imgs),$(images) $(pgfs))
 
 # alias
 logfile = $(TMPDIR)/$(result).log
@@ -119,13 +120,13 @@ debug:
 	@echo "recompile_cmd:$(recompile_cmd)"
 	@echo "mv_cmd:      $(mv_cmd)"
 	@echo "show_cmd:    $(show_cmd)"
-	@echo "img_pgfs:    $(img_pgfs)"
-	@echo "img_pgf_tmps:$(img_pgf_tmps)"
-	@echo "img_texs:    $(img_texs)"
-	@echo "img_pdfs:    $(img_pdfs)"
 	@echo "report_imgs: $(report_imgs)"
 	@echo "gen_imgs:    $(gen_imgs)"
 	@echo "images:      $(images)"
+	@echo "pgfs:        $(pgfs)"
+	@echo "img_pgfs:    $(img_pgfs)"
+	@echo "img_texs:    $(img_texs)"
+	@echo "img_pdfs:    $(img_pdfs)"
 	@echo "includes:    $(includes)"
 	@echo ""
 	@echo "if there is no rule to make files like header*.tex, check that REPORT_PATH (top) is set "
@@ -146,7 +147,7 @@ imgs:
 	$(img_gen) $(gen_imgs)
 
 # compile the final .pdf using all the image .pdfs (repeating to get references right)
-$(result).pdf: $(includes) $(images) $(source).tex
+$(result).pdf: $(includes) $(images) $(img_pdfs) $(source).tex
 	mkdir -p $(TMPDIR)
 	$(compile_cmd)
 	$(bibtex_cmd)
@@ -156,7 +157,7 @@ $(result).pdf: $(includes) $(images) $(source).tex
 	$(mv_cmd)
 
 # single run compile; may have missing page numbers and references, but faster
-single: $(includes) $(images) $(source).tex
+single: $(includes) $(images) $(img_pdfs) $(source).tex
 	mkdir -p $(TMPDIR)
 	$(compile_cmd)
 	$(bibtex_cmd)
@@ -178,7 +179,7 @@ $(img_pdfs): %.pdf: %.tex
 	$(tex_comp) $(mode) $(opts) "$(notdir $^)" $(pipe)
 	$(pdf_crop) "$@" "$@"
 
-$(img_pgf_tmps): $(img_pgfs)
+$(img_pgfs): $(TMPDIR)/%.pgf: %.pgf
 	mkdir -p $(TMPDIR)
 	/bin/rm -f "$@"; /bin/ln "$(notdir $@)" "$@"
 
