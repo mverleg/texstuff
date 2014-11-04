@@ -51,7 +51,7 @@ compile_cmd = $(tex_comp) $(mode) $(opts) -jobname="$(result)" "$(source).tex" $
 bibtex_cmd = if grep 'Please (re)run BibTeX' "$(TMPDIR)/$(result).log"; then /bin/cd "$(TMPDIR)"; $(bib_comp) "$(result).aux"; fi;
 pytex_cmd = if grep 'pythontex.sty' "$(TMPDIR)/$(result).log"; then $(python_comp) "$(TMPDIR)/$(result).pytxcode"; fi;
 recompile_cmd = @if grep 'Please (re)run BibTeX' "$(logfile)" || grep 'pythontex.sty' "$(logfile)"; then $(compile_cmd); fi;
-mv_cmd = if ! ( grep 'no output PDF file produced' "$(TMPDIR)/$(result).log" ); then /bin/mv "$(TMPDIR)/$(result).pdf" "$(result).pdf"; fi;
+mv_cmd = if grep 'no output PDF file produced' "$(TMPDIR)/$(result).log"; then /bin/rm -f "$(result).pdf"; else /bin/mv "$(TMPDIR)/$(result).pdf" "$(result).pdf"; fi;
 show_cmd = @if [ -f "$(result).pdf" ]; then $(pdf_viewer) "$(result).pdf"; else echo "no '$(result).pdf'\; making failed?"; fi;
 
 
@@ -135,7 +135,7 @@ debug:
 
 # remove temporary tex files
 clean:
-	/bin/rm -rf "$(TMPDIR)" $(img_texs) "$(result).pdf" flat.tex
+	/bin/rm -rf "$(TMPDIR)" $(img_texs) "$(result).pdf" flat.tex *.pyc
 
 # remove temporary and result files (not source and not images)
 rm:	clean
