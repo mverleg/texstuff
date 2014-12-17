@@ -1,0 +1,18 @@
+
+# path
+VPATH = $(HOME)/mods/TEX/report/tex
+include $(HOME)/mods/TEX/report/tex/basemanualmake
+
+# input file (latest matching v*.tex)
+source = $(basename $(shell ls -t v*.tex | head -1))
+# type the base names of pgf images
+pgfimgs = 
+# optional, for recompiling when outdated, include dependencies
+dependencies = radboud_dicp.png graphene_crystal_layers.png
+
+
+radboud_dicp.png: $(REPORT_PATH)/img/radboud_dicp.png
+	cp -f $< $@
+
+
+
