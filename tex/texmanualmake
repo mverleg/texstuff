@@ -1,7 +1,7 @@
 
 # path
 VPATH = $(HOME)/mods/TEX/report/tex
-include $(HOME)/mods/TEX/report/tex/basemanualmake
+include $(HOME)/mods/TEX/report/tex/basetexmanualmake
 
 # input file (latest matching v*.tex)
 source = $(basename $(shell ls -t v*.tex | head -1))
