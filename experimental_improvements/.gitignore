@@ -1,0 +1,16 @@
+*.png
+*.pgf
+*.pyc
+*.pdf
+
+textmp~/
+*.log
+*.aux
+*.toc
+*-blx.bib
+*.run.xml
+*.bbl
+*.blg
+*.out
+*.pytxcode
+
